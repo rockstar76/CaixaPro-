@@ -1,58 +1,60 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CaixaPro 📊</title>
-  <link rel="stylesheet" href="style.css" />
-  
-  <link rel="manifest" href="manifest.json" />
-<meta name="theme-color" content="#22c55e" />
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#22c55e">
+
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div class="container">
-    <h1>CaixaPro <span class="logo-emoji">📊</span></h1>
+<div class="container">
+  <h1>CaixaPro 📊</h1>
 
-    <div class="saldo">
-      Saldo atual: <span id="saldo">R$ 0,00</span>
-    </div>
-
-    <form id="form">
-      <input type="text" id="descricao" placeholder="Descrição" required />
-      <input type="number" id="valor" placeholder="Valor (R$)" required />
-      <input type="number" id="quantidade" placeholder="Quantidade" required />
-
-      <select id="tipo">
-        <option value="entrada">Entrada</option>
-        <option value="saida">Saída</option>
-      </select>
-
-      <button type="submit">Salvar</button>
-    </form>
-
-    <ul id="lista"></ul>
+  <div class="saldo">
+    Saldo atual: <strong id="saldo">R$ 0,00</strong>
   </div>
 
-  <!-- MODAL CONFIRMAÇÃO -->
-  <div id="modal" class="modal hidden">
-    <div class="modal-box">
-      <h3>Excluir lançamento?</h3>
-      <p>Essa ação não pode ser desfeita.</p>
+  <form id="form">
+    <input type="text" id="descricao" placeholder="Produto" required>
+    <input type="number" id="preco" placeholder="Preço unitário (R$)" required>
+    <input type="number" id="quantidade" placeholder="Quantidade" required>
 
-      <div class="modal-actions">
-        <button id="cancelar">Cancelar</button>
-        <button id="confirmar">Excluir</button>
-      </div>
+    <select id="tipo">
+      <option value="entrada">Entrada</option>
+      <option value="saida">Saída</option>
+    </select>
+
+    <button type="submit">Salvar</button>
+  </form>
+
+  <ul id="lista"></ul>
+</div>
+
+<!-- MODAL -->
+<div id="modal" class="modal hidden">
+  <div class="modal-box">
+    <h3>Excluir produto?</h3>
+    <p>Essa ação não pode ser desfeita.</p>
+
+    <div class="modal-actions">
+      <button id="cancelar">Cancelar</button>
+      <button id="confirmar">Excluir</button>
     </div>
   </div>
+</div>
 
-  <script src="script.js"></script>
-  
-  <script>
+<script src="script.js"></script>
+
+<script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("service-worker.js");
   }
 </script>
+
 </body>
 </html>

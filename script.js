@@ -3,15 +3,14 @@ const lista = document.getElementById("lista");
 const saldoEl = document.getElementById("saldo");
 
 const modal = document.getElementById("modal");
-const btnCancelar = document.getElementById("cancelar");
-const btnConfirmar = document.getElementById("confirmar");
+const cancelar = document.getElementById("cancelar");
+const confirmar = document.getElementById("confirmar");
 
 let transacoes = JSON.parse(localStorage.getItem("transacoes")) || [];
-let estoque = JSON.parse(localStorage.getItem("estoque")) || 0;
 let editIndex = null;
-let indexParaExcluir = null;
+let excluirIndex = null;
 
-function formatarData(data) {
+function formatarDataHora(data) {
   return new Date(data).toLocaleString("pt-BR");
 }
 
@@ -20,104 +19,85 @@ function atualizarTela() {
   let saldo = 0;
   
   transacoes.forEach((t, index) => {
+    const totalProduto = t.preco * t.quantidade;
+    saldo += t.tipo === "entrada" ? totalProduto : -totalProduto;
+    
     const li = document.createElement("li");
     li.className = t.tipo;
     
     li.innerHTML = `
       <div>
         <strong>${t.descricao}</strong><br>
-        <span class="data">${formatarData(t.data)}</span><br>
-        <span>Qtd: ${t.quantidade}</span>
+        ${t.quantidade} × R$ ${t.preco.toFixed(2)}<br>
+        <strong>Total: R$ ${totalProduto.toFixed(2)}</strong><br>
+        <small>${formatarDataHora(t.data)}</small>
       </div>
 
-      <div>
-        R$ ${t.valor.toFixed(2)}
-        <div class="actions">
-          <button class="editar" data-index="${index}">✏️</button>
-          <button class="excluir" data-index="${index}">🗑️</button>
-        </div>
+      <div class="actions">
+        <button onclick="editar(${index})">✏️</button>
+        <button onclick="abrirModal(${index})">🗑️</button>
       </div>
     `;
     
     lista.appendChild(li);
-    
-    saldo += t.tipo === "entrada" ? t.valor : -t.valor;
   });
   
   saldoEl.innerText = `R$ ${saldo.toFixed(2)}`;
-  
-  document.querySelectorAll(".editar").forEach(btn => {
-    btn.onclick = () => editar(btn.dataset.index);
-  });
-  
-  document.querySelectorAll(".excluir").forEach(btn => {
-    btn.onclick = () => abrirModal(btn.dataset.index);
-  });
+  localStorage.setItem("transacoes", JSON.stringify(transacoes));
 }
 
 function editar(index) {
-  index = Number(index);
   const t = transacoes[index];
-  
   document.getElementById("descricao").value = t.descricao;
-  document.getElementById("valor").value = t.valor;
+  document.getElementById("preco").value = t.preco;
   document.getElementById("quantidade").value = t.quantidade;
   document.getElementById("tipo").value = t.tipo;
-  
   editIndex = index;
 }
 
 function abrirModal(index) {
-  indexParaExcluir = Number(index);
+  excluirIndex = index;
   modal.classList.remove("hidden");
 }
 
-btnCancelar.onclick = () => {
-  indexParaExcluir = null;
+cancelar.onclick = () => {
   modal.classList.add("hidden");
+  excluirIndex = null;
 };
 
-btnConfirmar.onclick = () => {
-  const t = transacoes[indexParaExcluir];
-  estoque += t.tipo === "entrada" ? -t.quantidade : t.quantidade;
-  transacoes.splice(indexParaExcluir, 1);
+confirmar.onclick = () => {
+  transacoes.splice(excluirIndex, 1);
   modal.classList.add("hidden");
-  indexParaExcluir = null;
-  salvar();
-};
-
-function salvar() {
-  localStorage.setItem("transacoes", JSON.stringify(transacoes));
-  localStorage.setItem("estoque", JSON.stringify(estoque));
+  excluirIndex = null;
   atualizarTela();
-}
+};
 
-form.addEventListener("submit", (e) => {
+form.addEventListener("submit", e => {
   e.preventDefault();
   
   const descricao = document.getElementById("descricao").value;
-  const valor = Number(document.getElementById("valor").value);
+  const preco = Number(document.getElementById("preco").value);
   const quantidade = Number(document.getElementById("quantidade").value);
   const tipo = document.getElementById("tipo").value;
-  const data = new Date().toISOString();
   
-  if (tipo === "saida" && quantidade > estoque && editIndex === null) {
-    alert("⚠️ Estoque insuficiente!");
-    return;
-  }
+  const novo = {
+    descricao,
+    preco,
+    quantidade,
+    tipo,
+    data: new Date().toISOString()
+  };
   
   if (editIndex !== null) {
-    const antigo = transacoes[editIndex];
-    estoque += antigo.tipo === "entrada" ? -antigo.quantidade : antigo.quantidade;
-    transacoes[editIndex] = { descricao, valor, quantidade, tipo, data };
+    novo.data = transacoes[editIndex].data; // mantém a data original
+    transacoes[editIndex] = novo;
     editIndex = null;
   } else {
-    transacoes.push({ descricao, valor, quantidade, tipo, data });
+    transacoes.push(novo);
   }
   
-  estoque += tipo === "entrada" ? quantidade : -quantidade;
   form.reset();
-  salvar();
+  atualizarTela();
 });
 
 atualizarTela();
